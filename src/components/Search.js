@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-
+import axios from 'axios'
 import BlogTile from './subcomponents/BlogTile';
 import UserTile from './subcomponents/UserTile';
 
@@ -15,15 +15,36 @@ class Search extends Component{
             searchType: 'blogs',
         }
     }
-    
+
+
     
     // insert search method
+    search(e){
+        e.preventDefault()
+        const { searchTerm, searchType }=this.state
+        
+        axios.get(`/api/${searchType}?q=${searchTerm}`).then(response=>{
+            if(searchType==='blogs'){
+                this.props.history.push(makeQuery('/search?',{q:searchTerm,type:searchType}))
+                this.setState({
+                    blogResults: response.data,
+                    userResults: []
+                })
+            }else{
+                this.props.history.push(makeQuery('/search?',{q:searchTerm,type:searchType}))
+                this.setState({
+                    blogResults: [],
+                    userResults: response.data
+                })
+            }
+        }).catch(console.log)
+    }
     
     
     render(){
         // map over the blogResults and userResults here, replace the empty arrays.
-        const blogResults = []
-        const userResults = []
+        const blogResults = this.state.blogResults.map((c,i)=> <BlogTile key={i} blog={c}/> )
+        const userResults = this.state.userResults.map((c,i)=> <UserTile key={i} user={c}/>)
 
         return(
             <div className='content search-view' >
